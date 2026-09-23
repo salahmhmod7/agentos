@@ -43,9 +43,12 @@ app.mount("/static", StaticFiles(directory=str(STATIC_DIR)), name="static")
 app.include_router(api_router)
 
 
-@app.get("/eval", include_in_schema=False)
-def eval_ui() -> FileResponse:
-    return FileResponse(STATIC_DIR / "eval.html")
+# ----- UI routes -----
+
+@app.get("/", include_in_schema=False)
+def root() -> FileResponse:
+    return FileResponse(STATIC_DIR / "index.html")
+
 
 @app.get("/chat", include_in_schema=False)
 def chat_ui() -> FileResponse:
@@ -55,6 +58,13 @@ def chat_ui() -> FileResponse:
 @app.get("/documents", include_in_schema=False)
 def documents_ui() -> FileResponse:
     return FileResponse(STATIC_DIR / "documents.html")
+
+
+@app.get("/eval", include_in_schema=False)
+def eval_ui() -> FileResponse:
+    return FileResponse(STATIC_DIR / "eval.html")
+
+
 @app.get("/graph-chat", include_in_schema=False)
 def graph_chat_ui() -> FileResponse:
     return FileResponse(STATIC_DIR / "graph_chat.html")
