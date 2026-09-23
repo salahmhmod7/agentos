@@ -55,3 +55,6 @@ def chat_ui() -> FileResponse:
 @app.get("/documents", include_in_schema=False)
 def documents_ui() -> FileResponse:
     return FileResponse(STATIC_DIR / "documents.html")
+@app.get("/graph-chat", include_in_schema=False)
+def graph_chat_ui() -> FileResponse:
+    return FileResponse(STATIC_DIR / "graph_chat.html")

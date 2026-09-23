@@ -4,6 +4,7 @@
   const links = [
     { href: '/',          label: 'Dashboard' },
     { href: '/chat',      label: 'Chat' },
+    { href: '/graph-chat', label: 'Graph' },
     { href: '/documents', label: 'Documents' },
     { href: '/eval',      label: 'Eval' },
     { href: '/docs',      label: 'API' },

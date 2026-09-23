@@ -93,3 +93,28 @@ class StatsResponse(BaseModel):
     chunks: int
     provider: str
     model: str
+class GraphChatRequest(BaseModel):
+    """Send a message to the LangGraph agent."""
+
+    message: str = Field(..., min_length=1, max_length=5000)
+    conversation_id: int | None = None
+
+
+class PendingApproval(BaseModel):
+    tool: str
+    arguments: dict
+    iteration: int
+
+
+class GraphChatResponse(BaseModel):
+    status: str  # "done" | "paused" | "failed"
+    thread_id: str
+    conversation_id: int
+    iterations: int = 0
+    final_answer: str | None = None
+    pending_approval: PendingApproval | None = None
+    tool_calls: list[ToolCallOut] = []
+
+
+class ApprovalRequest(BaseModel):
+    approved: bool

@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AgentOS — Graph Chat (HITL)</title>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .approval-modal {
+    position: fixed; inset: 0;
+    background: rgba(0,0,0,0.75);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 2rem;
+    z-index: 1000;
+  }
+  .approval-modal.visible { display: flex; }
+  .approval-card {
+    background: var(--bg-2);
+    border: 1px solid var(--yellow);
+    border-radius: 10px;
+    padding: 1.5rem;
+    max-width: 640px;
+    width: 100%;
+    max-height: 80vh;
+    overflow-y: auto;
+  }
+  .approval-card h2 {
+    color: var(--yellow);
+    margin: 0 0 0.5rem;
+    font-size: 1.2rem;
+  }
+  .approval-card .tool-name {
+    display: inline-block;
+    padding: 0.2rem 0.6rem;
+    background: rgba(210,153,34,0.15);
+    color: var(--yellow);
+    border-radius: 4px;
+    font-family: "Consolas", monospace;
+    font-size: 0.9rem;
+    margin: 0.5rem 0;
+  }
+  .approval-card .args {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-family: "Consolas", monospace;
+    font-size: 0.8rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    max-height: 250px;
+    overflow-y: auto;
+    margin: 0.75rem 0;
+    color: var(--text);
+  }
+  .approval-actions {
+    display: flex;
+    gap: 0.75rem;
+    margin-top: 1rem;
+  }
+  .approval-actions button {
+    flex: 1;
+    padding: 0.75rem;
+    font-size: 1rem;
+  }
+  .step {
+    padding: 0.5rem 0.75rem;
+    border-left: 3px solid var(--border);
+    margin-bottom: 0.4rem;
+    font-size: 0.85rem;
+  }
+  .step.tool { border-color: var(--purple); }
+  .step.info { border-color: var(--blue); }
+  .step.ok   { border-color: var(--green); }
+  .step.err  { border-color: var(--red); }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Graph Chat</h1>
+    <p class="muted small">Full LangGraph run with human-in-the-loop approval.</p>
+
+    <div class="controls">
+      <input id="msg" type="text" placeholder="Ask something..." value="Save a short markdown report about Ada Lovelace.">
+      <button class="btn" id="go">Run</button>
+    </div>
+
+    <div class="card" id="status-card" style="display:none">
+      <div class="small muted">Thread: <span class="mono" id="thread-id">—</span></div>
+      <div class="small muted">Status: <span id="status">—</span></div>
+    </div>
+
+    <h2>Steps</h2>
+    <div id="steps" class="card" style="min-height:80px"></div>
+
+    <div class="final-box" id="final" style="display:none">
+      <h3>Final Answer</h3>
+      <div id="final-text" style="white-space:pre-wrap"></div>
+    </div>
+  </div>
+
+  <!-- Approval modal -->
+  <div class="approval-modal" id="approval-modal">
+    <div class="approval-card">
+      <h2>⏸️ Approval Required</h2>
+      <p class="muted small">The agent wants to run the following tool. Do you approve?</p>
+      <div class="tool-name" id="approval-tool">—</div>
+      <div class="small muted" style="margin-top:0.75rem">Arguments:</div>
+      <div class="args" id="approval-args">—</div>
+      <div class="approval-actions">
+        <button class="btn" id="btn-approve">✅ Approve</button>
+        <button class="btn danger" id="btn-reject">❌ Reject</button>
+      </div>
+    </div>
+  </div>
+
+<script src="/static/nav.js"></script>
+<script>
+let currentThread = null;
+let renderedToolCount = 0;  // tracks how many tool calls are already shown
+
+const steps = document.getElementById('steps');
+const statusCard = document.getElementById('status-card');
+const statusEl = document.getElementById('status');
+const threadEl = document.getElementById('thread-id');
+const finalDiv = document.getElementById('final');
+const finalText = document.getElementById('final-text');
+const modal = document.getElementById('approval-modal');
+
+function addStep(text, cls = 'info') {
+  const d = document.createElement('div');
+  d.className = 'step ' + cls;
+  d.textContent = text;
+  steps.appendChild(d);
+}
+
+function clearSteps() {
+  steps.innerHTML = '';
+  finalDiv.style.display = 'none';
+  finalText.textContent = '';
+  renderedToolCount = 0;
+}
+
+function renderToolCalls(toolCalls) {
+  // Backend sends the cumulative list every time; only render the new ones
+  const all = toolCalls || [];
+  const newOnes = all.slice(renderedToolCount);
+  newOnes.forEach(tc => {
+    if (tc.error) {
+      addStep(`[${tc.iteration}] ⚙ ${tc.tool_name} → ERROR: ${tc.error}`, 'err');
+    } else {
+      addStep(`[${tc.iteration}] ⚙ ${tc.tool_name}(${JSON.stringify(tc.arguments)})`, 'tool');
+    }
+  });
+  renderedToolCount = all.length;
+}
+
+function showApproval(pending) {
+  document.getElementById('approval-tool').textContent = pending.tool;
+  document.getElementById('approval-args').textContent =
+    JSON.stringify(pending.arguments, null, 2);
+  modal.classList.add('visible');
+}
+
+function hideApproval() {
+  modal.classList.remove('visible');
+}
+
+async function startRun() {
+  const message = document.getElementById('msg').value.trim();
+  if (!message) return;
+
+  clearSteps();
+  statusCard.style.display = 'block';
+  statusEl.textContent = 'running…';
+  threadEl.textContent = '—';
+
+  addStep('▶ Starting graph run…', 'info');
+
+  const res = await fetch('/api/graph/chat', {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({message}),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({detail: 'unknown error'}));
+    addStep(`❌ ${err.detail}`, 'err');
+    statusEl.textContent = 'failed';
+    return;
+  }
+
+  handleResult(await res.json());
+}
+
+function handleResult(data) {
+  currentThread = data.thread_id;
+  threadEl.textContent = data.thread_id;
+  statusEl.textContent = data.status;
+
+  renderToolCalls(data.tool_calls);
+
+  if (data.status === 'paused' && data.pending_approval) {
+    addStep(`⏸️ Paused for approval: ${data.pending_approval.tool}`, 'info');
+    showApproval(data.pending_approval);
+    return;
+  }
+
+  if (data.final_answer) {
+    addStep('✅ Done', 'ok');
+    finalText.textContent = data.final_answer;
+    finalDiv.style.display = 'block';
+  }
+}
+
+async function submitDecision(approved) {
+  hideApproval();
+  if (!currentThread) return;
+
+  addStep(`👤 Human decision: ${approved ? 'APPROVED' : 'REJECTED'}`, 'info');
+
+  const res = await fetch(`/api/graph/approve/${currentThread}`, {
+    method: 'POST',
+    headers: {'Content-Type': 'application/json'},
+    body: JSON.stringify({approved}),
+  });
+
+  if (!res.ok) {
+    const err = await res.json().catch(() => ({detail: 'unknown error'}));
+    addStep(`❌ ${err.detail}`, 'err');
+    return;
+  }
+
+  handleResult(await res.json());
+}
+
+document.getElementById('go').onclick = startRun;
+document.getElementById('msg').addEventListener('keydown', e => {
+  if (e.key === 'Enter') startRun();
+});
+document.getElementById('btn-approve').onclick = () => submitDecision(true);
+document.getElementById('btn-reject').onclick = () => submitDecision(false);
+</script>
+</body>
+</html>
