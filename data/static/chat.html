@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AgentOS — Chat</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Live Chat</h1>
+
+    <div class="controls">
+      <input id="msg" type="text" placeholder="Ask something..." value="Who was Ada Lovelace?">
+      <button class="btn" id="go">Send</button>
+      <button class="btn secondary" id="attach" title="Upload a document">📎</button>
+      <input type="file" id="file" accept=".pdf,.txt,.md" style="display:none">
+    </div>
+    <div id="upload-info" class="small muted" style="margin-bottom:1rem"></div>
+
+    <div class="events" id="events"></div>
+
+    <div class="final-box" id="final" style="display:none">
+      <h3>Final Answer</h3>
+      <div id="final-text"></div>
+    </div>
+  </div>
+
+<script src="/static/nav.js"></script>
+<script>
+const eventsDiv = document.getElementById('events');
+const finalDiv  = document.getElementById('final');
+const finalText = document.getElementById('final-text');
+const msgInput  = document.getElementById('msg');
+const goBtn     = document.getElementById('go');
+const attachBtn = document.getElementById('attach');
+const fileInput = document.getElementById('file');
+const uploadInfo = document.getElementById('upload-info');
+let currentES = null;
+
+function appendLine(type, text) {
+  const div = document.createElement('div');
+  div.className = 'ev ev-' + type;
+  div.textContent = text;
+  eventsDiv.appendChild(div);
+  eventsDiv.scrollTop = eventsDiv.scrollHeight;
+}
+
+function handleEvent(ev) {
+  const d = ev.data || {};
+  switch (ev.type) {
+    case 'run_start':
+      appendLine('run_start', `▶ RUN START — "${d.user_message}"  [${d.provider || ''}:${d.model}]`);
+      break;
+    case 'iteration_start':
+      appendLine('iteration_start', `  ⟳ iteration ${d.iteration}`);
+      break;
+    case 'llm_call_start':
+      appendLine('llm_call_start', `    → LLM ...`);
+      break;
+    case 'llm_call_end':
+      appendLine('llm_call_end', `       ${d.duration_s.toFixed(1)}s (${d.tool_calls} tool call(s))`);
+      break;
+    case 'tool_call_start': {
+      const args = Object.entries(d.arguments || {}).map(([k,v]) => `${k}=${JSON.stringify(v)}`).join(', ');
+      appendLine('tool_call_start', `    ⚙ ${d.tool_name}(${args})`);
+      break;
+    }
+    case 'tool_call_end':
+      appendLine('tool_call_end', `       ✓ ${d.duration_s.toFixed(2)}s`);
+      break;
+    case 'error':
+      appendLine('error', `    ! ERROR: ${d.message}`);
+      break;
+    case 'run_end':
+      appendLine('run_end', `■ RUN END — status=${d.status} | total=${d.duration_s.toFixed(1)}s`);
+      break;
+  }
+}
+
+function startStream() {
+  const message = msgInput.value.trim();
+  if (!message) return;
+  if (currentES) currentES.close();
+  eventsDiv.innerHTML = '';
+  finalDiv.style.display = 'none';
+  goBtn.disabled = true;
+
+  const es = new EventSource(`/api/chat/stream?message=${encodeURIComponent(message)}`);
+  currentES = es;
+
+  es.onmessage = (e) => {
+    if (!e.data) return;
+    try { handleEvent(JSON.parse(e.data)); } catch {}
+  };
+
+  es.addEventListener('end', () => {
+    es.close();
+    currentES = null;
+    goBtn.disabled = false;
+
+    fetch('/api/conversations')
+      .then(r => r.json())
+      .then(list => {
+        if (!list.length) return;
+        return fetch(`/api/conversations/${list[0].id}`).then(r => r.json());
+      })
+      .then(conv => {
+        if (!conv || !conv.runs || !conv.runs.length) return;
+        const last = conv.runs[conv.runs.length - 1];
+        if (last.final_answer) {
+          finalText.textContent = last.final_answer;
+          finalDiv.style.display = 'block';
+        }
+      })
+      .catch(() => {});
+  });
+
+  es.onerror = () => {
+    appendLine('error', '    ! Connection error');
+    es.close();
+    goBtn.disabled = false;
+  };
+}
+
+goBtn.onclick = startStream;
+msgInput.addEventListener('keydown', e => { if (e.key === 'Enter') startStream(); });
+
+attachBtn.onclick = () => fileInput.click();
+fileInput.addEventListener('change', async () => {
+  if (!fileInput.files.length) return;
+  const file = fileInput.files[0];
+  uploadInfo.innerHTML = `<span style="color:var(--yellow)">⏳ Uploading ${file.name}…</span>`;
+  const form = new FormData();
+  form.append('file', file);
+  try {
+    const res = await fetch('/api/documents', { method: 'POST', body: form });
+    if (!res.ok) throw new Error((await res.json()).detail || 'Upload failed');
+    const data = await res.json();
+    uploadInfo.innerHTML = `<span style="color:var(--green)">✅ ${data.filename} indexed (${data.num_chunks} chunks)</span>`;
+  } catch (e) {
+    uploadInfo.innerHTML = `<span style="color:var(--red)">❌ ${e.message}</span>`;
+  }
+  fileInput.value = '';
+});
+</script>
+</body>
+</html>

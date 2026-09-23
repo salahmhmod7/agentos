@@ -1,0 +1,234 @@
+{
+  "name": "AgentOS Baseline Eval",
+  "version": "1.0",
+  "description": "25 test cases across 5 categories. Run: python -m scripts.run_eval",
+  "cases": [
+    {
+      "id": "F01",
+      "category": "factual",
+      "question": "According to Python for Data Analysis, what does the dropna() method do by default?",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": ["dropna", "missing", "na"],
+      "expected_answer_type": "present",
+      "notes": "Basic single-chunk retrieval"
+    },
+    {
+      "id": "F02",
+      "category": "factual",
+      "question": "According to the book, what is the difference between isna() and notna()?",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": ["isna", "notna", "boolean"],
+      "expected_answer_type": "present"
+    },
+    {
+      "id": "F03",
+      "category": "factual",
+      "question": "What does the book say about the fillna() method? Give one specific example.",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": ["fillna", "fill"],
+      "expected_answer_type": "present"
+    },
+    {
+      "id": "F04",
+      "category": "factual",
+      "question": "According to the book, what NumPy function is used to create a pandas Series from a Python list?",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": ["series"],
+      "expected_answer_type": "present"
+    },
+    {
+      "id": "F05",
+      "category": "factual",
+      "question": "What does the book say about reading CSV files with pandas?",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": ["read_csv", "csv"],
+      "expected_answer_type": "present"
+    },
+    {
+      "id": "M01",
+      "category": "multi_chunk",
+      "question": "Explain the difference between dropna(), fillna(), and replace() according to the book. Cite the chapter for each.",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": ["dropna", "fillna", "replace", "chapter"],
+      "expected_answer_type": "present"
+    },
+    {
+      "id": "M02",
+      "category": "multi_chunk",
+      "question": "How does the book describe grouping data and applying aggregations? Mention specific functions.",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": ["groupby", "aggregate"],
+      "expected_answer_type": "present"
+    },
+    {
+      "id": "M03",
+      "category": "multi_chunk",
+      "question": "What does the book cover about time series data? Mention at least two specific concepts.",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": ["time"],
+      "expected_answer_type": "present"
+    },
+    {
+      "id": "M04",
+      "category": "multi_chunk",
+      "question": "According to the book, how do you combine or merge DataFrames? Give one concrete example.",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": ["merge", "join", "combine"],
+      "expected_answer_type": "present"
+    },
+    {
+      "id": "M05",
+      "category": "multi_chunk",
+      "question": "What are the main plotting tools the book discusses? Give at least three specific plotting functions.",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": ["plot", "matplotlib"],
+      "expected_answer_type": "present"
+    },
+    {
+      "id": "A01",
+      "category": "adversarial",
+      "question": "According to the book, does fillna() support machine-learning-based imputation? Cite the exact passage.",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": ["no", "not", "does not"],
+      "expected_answer_type": "not_found"
+    },
+    {
+      "id": "A02",
+      "category": "adversarial",
+      "question": "Does the book recommend using PyTorch for data manipulation? Quote the exact recommendation.",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": [],
+      "expected_answer_type": "not_found"
+    },
+    {
+      "id": "A03",
+      "category": "adversarial",
+      "question": "According to the book, does replace() accept regular expressions? Cite the exact passage where regex is mentioned for replace().",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": [],
+      "expected_answer_type": "not_found"
+    },
+    {
+      "id": "A04",
+      "category": "adversarial",
+      "question": "Does the book cover deep learning models like transformers for time series prediction? Cite the chapter.",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": [],
+      "expected_answer_type": "not_found"
+    },
+    {
+      "id": "A05",
+      "category": "adversarial",
+      "question": "According to the book, does pandas have a built-in function to automatically detect and fix duplicate column names with fuzzy matching?",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": [],
+      "expected_answer_type": "not_found"
+    },
+    {
+      "id": "B01",
+      "category": "boundary",
+      "question": "What does the book say about Rust's ownership model in data analysis? If it doesn't cover this, say 'Not found in the book'.",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": [],
+      "expected_answer_type": "not_found"
+    },
+    {
+      "id": "B02",
+      "category": "boundary",
+      "question": "According to the book, what is the best GPU for training neural networks? If not covered, say 'Not found in the book'.",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": [],
+      "expected_answer_type": "not_found"
+    },
+    {
+      "id": "B03",
+      "category": "boundary",
+      "question": "Does the book explain how to deploy a pandas pipeline to a Kubernetes cluster? If not, say 'Not found in the book'.",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": [],
+      "expected_answer_type": "not_found"
+    },
+    {
+      "id": "B04",
+      "category": "boundary",
+      "question": "What does the book say about using JavaScript for data analysis? If not covered, say 'Not found in the book'.",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": [],
+      "expected_answer_type": "not_found"
+    },
+    {
+      "id": "B05",
+      "category": "boundary",
+      "question": "According to the book, what is the recommended Docker image for pandas development? If not covered, say 'Not found in the book'.",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": [],
+      "expected_answer_type": "not_found"
+    },
+    {
+      "id": "C01",
+      "category": "citation",
+      "question": "According to the book, what exactly does the dropna() example show? Quote the example code.",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": ["dropna"],
+      "expected_answer_type": "present",
+      "notes": "Should distinguish between quoting and paraphrasing"
+    },
+    {
+      "id": "C02",
+      "category": "citation",
+      "question": "Give me an exact quote from the book about fillna() with the mean.",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": ["fillna", "mean"],
+      "expected_answer_type": "present"
+    },
+    {
+      "id": "C03",
+      "category": "citation",
+      "question": "According to the book, what specific chapter covers time series? Give the chapter number and one example.",
+      "expected_tool": "knowledge_search",
+      "expected_source": "Python for Data Analysis",
+      "expected_keywords": ["chapter", "time"],
+      "expected_answer_type": "present"
+    },
+    {
+      "id": "X01",
+      "category": "cross_tool",
+      "question": "What is 12345 * 6789?",
+      "expected_tool": "calculator",
+      "expected_source": null,
+      "expected_keywords": ["83810205"],
+      "expected_answer_type": "present"
+    },
+    {
+      "id": "X02",
+      "category": "cross_tool",
+      "question": "Who was Ada Lovelace? Give a two-sentence summary.",
+      "expected_tool": "wikipedia",
+      "expected_source": null,
+      "expected_keywords": ["lovelace", "mathematician"],
+      "expected_answer_type": "present"
+    }
+  ]
+}

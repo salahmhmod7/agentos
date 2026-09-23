@@ -1,0 +1,303 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AgentOS — Eval</title>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .metric-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+    gap: 1rem;
+    margin-bottom: 1.5rem;
+  }
+  .metric {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 1rem 1.25rem;
+  }
+  .metric .label {
+    color: var(--text-dim);
+    font-size: 0.75rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  .metric .value {
+    font-size: 1.9rem;
+    font-weight: 700;
+    margin-top: 0.25rem;
+    color: var(--blue);
+  }
+  .metric .hint {
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    margin-top: 0.15rem;
+  }
+  .metric.good .value { color: var(--green); }
+  .metric.warn .value { color: var(--yellow); }
+  .metric.bad .value { color: var(--red); }
+
+  .case-row td {
+    vertical-align: top;
+    font-size: 0.85rem;
+  }
+  .pill {
+    display: inline-block;
+    padding: 0.15rem 0.55rem;
+    border-radius: 999px;
+    font-size: 0.72rem;
+    font-weight: 600;
+    border: 1px solid var(--border);
+  }
+  .pill.ok    { background: rgba(63,185,80,0.12); color: var(--green); border-color: rgba(63,185,80,0.3); }
+  .pill.fail  { background: rgba(248,81,73,0.12); color: var(--red); border-color: rgba(248,81,73,0.3); }
+  .pill.warn  { background: rgba(210,153,34,0.12); color: var(--yellow); border-color: rgba(210,153,34,0.3); }
+  .pill.dim   { background: var(--bg-3); color: var(--text-dim); }
+
+  .case-detail {
+    background: var(--bg);
+    border-top: 1px solid var(--border);
+    padding: 0.75rem 1rem;
+  }
+  .case-detail pre {
+    background: var(--bg-2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 0.75rem;
+    font-family: "Consolas", "Monaco", monospace;
+    font-size: 0.8rem;
+    white-space: pre-wrap;
+    word-break: break-word;
+    color: var(--text);
+  }
+  tr.case-row { cursor: pointer; }
+  tr.case-row:hover td { background: var(--bg-3); }
+
+  .category-bars {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+  }
+  .cat-row {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    font-size: 0.85rem;
+  }
+  .cat-name {
+    width: 140px;
+    color: var(--text-dim);
+  }
+  .cat-bar {
+    flex: 1;
+    height: 8px;
+    background: var(--bg-3);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+  .cat-bar > div {
+    height: 100%;
+    background: var(--green);
+  }
+  .cat-val {
+    width: 60px;
+    text-align: right;
+    color: var(--text);
+    font-family: "Consolas", "Monaco", monospace;
+  }
+</style>
+</head>
+<body>
+  <div class="container">
+    <div style="display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:1rem">
+      <div>
+        <h1 style="margin:0">Evaluation</h1>
+        <p class="muted small" id="meta" style="margin-top:0.25rem">Loading…</p>
+      </div>
+      <button class="btn secondary" id="reload">↻ Reload</button>
+    </div>
+
+    <div id="empty" class="card" style="display:none">
+      <p class="muted">No evaluation report yet.</p>
+      <pre class="mono">python -m scripts.run_eval</pre>
+    </div>
+
+    <div id="content" style="display:none">
+      <!-- Summary metrics -->
+      <div class="metric-grid" id="metrics"></div>
+
+      <!-- Category breakdown -->
+      <div class="card">
+        <h2 style="margin-top:0">By category</h2>
+        <div class="category-bars" id="categories"></div>
+      </div>
+
+      <!-- Cases table -->
+      <div class="card" style="padding:0;overflow:hidden">
+        <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border)">
+          <h2 style="margin:0">Cases</h2>
+          <p class="muted small" style="margin:0.25rem 0 0">Click a row to expand details</p>
+        </div>
+        <table id="cases-table">
+          <thead>
+            <tr>
+              <th style="width:60px">ID</th>
+              <th style="width:110px">Category</th>
+              <th style="width:70px">Status</th>
+              <th style="width:80px">Latency</th>
+              <th>Question</th>
+              <th style="width:80px">Tools</th>
+            </tr>
+          </thead>
+          <tbody id="cases-body"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+<script src="/static/nav.js"></script>
+<script>
+const RELOAD = document.getElementById('reload');
+RELOAD.onclick = () => load(true);
+
+function fmt_pct(v) {
+  if (v === null || v === undefined) return '—';
+  return (v * 100).toFixed(1) + '%';
+}
+
+function metricClass(metric, value) {
+  if (value === null || value === undefined) return '';
+  if (metric === 'failure_rate' || metric === 'hallucination_rate') {
+    if (value <= 0.05) return 'good';
+    if (value <= 0.15) return 'warn';
+    return 'bad';
+  }
+  if (value >= 0.9) return 'good';
+  if (value >= 0.7) return 'warn';
+  return 'bad';
+}
+
+function renderMetrics(s) {
+  const items = [
+    { key: 'tool_accuracy',       label: 'Tool Accuracy' },
+    { key: 'retrieval_hit_rate',  label: 'Retrieval Hit Rate' },
+    { key: 'citation_rate',       label: 'Citation Rate' },
+    { key: 'boundary_compliance', label: 'Boundary Compliance' },
+    { key: 'hallucination_rate',  label: 'Hallucination Rate' },
+    { key: 'failure_rate',        label: 'Failure Rate' },
+  ];
+  const html = items.map(i => {
+    const v = s[i.key];
+    const cls = metricClass(i.key, v);
+    return `<div class="metric ${cls}">
+      <div class="label">${i.label}</div>
+      <div class="value">${fmt_pct(v)}</div>
+    </div>`;
+  }).join('') + `
+    <div class="metric">
+      <div class="label">Avg Latency</div>
+      <div class="value" style="color:var(--text)">${s.avg_latency_s}s</div>
+      <div class="hint">max ${s.max_latency_s}s</div>
+    </div>
+    <div class="metric">
+      <div class="label">Total Runs</div>
+      <div class="value" style="color:var(--text)">${s.total_runs}</div>
+    </div>
+  `;
+  document.getElementById('metrics').innerHTML = html;
+}
+
+function renderCategories(byCat) {
+  const el = document.getElementById('categories');
+  const rows = Object.entries(byCat).map(([name, c]) => {
+    const pct = (c.tool_correct || 0) * 100;
+    const color = pct >= 90 ? 'var(--green)' : pct >= 70 ? 'var(--yellow)' : 'var(--red)';
+    return `<div class="cat-row">
+      <div class="cat-name">${name}</div>
+      <div class="cat-bar"><div style="width:${pct}%;background:${color}"></div></div>
+      <div class="cat-val">${pct.toFixed(0)}%</div>
+    </div>`;
+  }).join('');
+  el.innerHTML = rows;
+}
+
+function pill(ok, text_ok, text_fail) {
+  return ok ? `<span class="pill ok">${text_ok}</span>` : `<span class="pill fail">${text_fail}</span>`;
+}
+
+function renderCases(results) {
+  const body = document.getElementById('cases-body');
+  body.innerHTML = results.map(r => {
+    const status = r.failure ? 'fail' : 'ok';
+    const statusText = r.failure ? 'FAIL' : 'OK';
+    const toolOk = r.tool_correct === true;
+    const toolPill = r.tool_correct === null
+      ? '<span class="pill dim">n/a</span>'
+      : (toolOk ? '<span class="pill ok">✓</span>' : '<span class="pill fail">✗</span>');
+    const tools = (r.tools_used || []).join(', ') || '—';
+    return `
+      <tr class="case-row" data-id="${r.id}">
+        <td class="mono">${r.id}</td>
+        <td class="muted">${r.category}</td>
+        <td><span class="pill ${status}">${statusText}</span></td>
+        <td class="mono">${r.latency_s}s</td>
+        <td>${escapeHtml(r.question)}</td>
+        <td>${toolPill} <span class="muted small">${escapeHtml(tools)}</span></td>
+      </tr>
+      <tr class="case-detail-row" id="detail-${r.id}" style="display:none">
+        <td colspan="6" style="padding:0;border:none">
+          <div class="case-detail">
+            <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:0.75rem;margin-bottom:0.75rem">
+              <div><span class="muted small">Iterations:</span> <span class="mono">${r.iterations}</span></div>
+              <div><span class="muted small">Citation:</span> ${r.citation_present ? '<span class="pill ok">yes</span>' : '<span class="pill dim">no</span>'}</div>
+              <div><span class="muted small">Hallucinated:</span> ${r.hallucinated === true ? '<span class="pill fail">yes</span>' : r.hallucinated === false ? '<span class="pill ok">no</span>' : '<span class="pill dim">n/a</span>'}</div>
+              <div><span class="muted small">Boundary:</span> ${r.boundary_compliant === true ? '<span class="pill ok">compliant</span>' : r.boundary_compliant === false ? '<span class="pill fail">violated</span>' : '<span class="pill dim">n/a</span>'}</div>
+            </div>
+            <div class="muted small" style="margin-bottom:0.25rem">Answer:</div>
+            <pre>${escapeHtml(r.final_answer || '(empty)')}</pre>
+          </div>
+        </td>
+      </tr>
+    `;
+  }).join('');
+
+  // Toggle details on row click
+  document.querySelectorAll('tr.case-row').forEach(tr => {
+    tr.onclick = () => {
+      const id = tr.dataset.id;
+      const d = document.getElementById('detail-' + id);
+      d.style.display = d.style.display === 'none' ? 'table-row' : 'none';
+    };
+  });
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+async function load(force) {
+  const res = await fetch('/api/eval/latest');
+  if (!res.ok) {
+    document.getElementById('empty').style.display = 'block';
+    document.getElementById('content').style.display = 'none';
+    return;
+  }
+  const report = await res.json();
+  document.getElementById('empty').style.display = 'none';
+  document.getElementById('content').style.display = 'block';
+
+  document.getElementById('meta').textContent =
+    `${report.name} · v${report.version} · ${report.timestamp.slice(0,19).replace('T',' ')}`;
+
+  renderMetrics(report.summary);
+  renderCategories(report.summary.by_category || {});
+  renderCases(report.results || []);
+}
+
+load();
+</script>
+</body>
+</html>

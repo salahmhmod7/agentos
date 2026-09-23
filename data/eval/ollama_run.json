@@ -1,0 +1,575 @@
+{
+  "name": "AgentOS Baseline Eval",
+  "version": "1.0",
+  "timestamp": "2026-09-22T13:06:02.007877+00:00",
+  "summary": {
+    "total_runs": 25,
+    "tool_accuracy": 1.0,
+    "retrieval_hit_rate": 1.0,
+    "citation_rate": 0.0,
+    "boundary_compliance": 1.0,
+    "hallucination_rate": 0.0,
+    "failure_rate": 0.0,
+    "avg_latency_s": 113.83,
+    "max_latency_s": 216.21,
+    "by_category": {
+      "factual": {
+        "count": 5,
+        "tool_correct": 1.0,
+        "failures": 0
+      },
+      "multi_chunk": {
+        "count": 5,
+        "tool_correct": 1.0,
+        "failures": 0
+      },
+      "adversarial": {
+        "count": 5,
+        "tool_correct": 1.0,
+        "failures": 0
+      },
+      "boundary": {
+        "count": 5,
+        "tool_correct": 1.0,
+        "failures": 0
+      },
+      "citation": {
+        "count": 3,
+        "tool_correct": 1.0,
+        "failures": 0
+      },
+      "cross_tool": {
+        "count": 2,
+        "tool_correct": 1.0,
+        "failures": 0
+      }
+    }
+  },
+  "results": [
+    {
+      "id": "F01",
+      "category": "factual",
+      "question": "According to Python for Data Analysis, what does the dropna() method do by default?",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 164.44,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 3,
+      "keywords_total": 3,
+      "keyword_ratio": 1.0,
+      "citation_present": false,
+      "boundary_compliant": null,
+      "hallucinated": null,
+      "final_answer": "The `dropna()` method, by default, filters out any row containing a missing value (NaN) in a DataFrame. It returns a DataFrame with only the rows that have complete data. For a Series, it removes the entries that are NaN. You can specify `how='all'` to drop only rows that are entirely NaN."
+    },
+    {
+      "id": "F02",
+      "category": "factual",
+      "question": "According to the book, what is the difference between isna() and notna()?",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 78.78,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 1,
+      "keywords_total": 3,
+      "keyword_ratio": 0.333,
+      "citation_present": false,
+      "boundary_compliant": null,
+      "hallucinated": null,
+      "final_answer": "According to the book \"Python for Data Analysis,\" `isnull()` returns boolean values indicating which values are missing or NA, while `notnull()` is the negation of `isnull()`, meaning it returns true for non-missing values."
+    },
+    {
+      "id": "F03",
+      "category": "factual",
+      "question": "What does the book say about the fillna() method? Give one specific example.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 112.16,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 2,
+      "keywords_total": 2,
+      "keyword_ratio": 1.0,
+      "citation_present": false,
+      "boundary_compliant": null,
+      "hallucinated": null,
+      "final_answer": "The book explains that the `fillna()` method in pandas can be used to replace specific values, such as sentinel values for missing data, with more meaningful values. For example, consider the following Series where -999 values are used as sentinel values for missing data:\n\n```python\ndata = pd.Series([1., -999., 2., -999., -1000., 3.])\n```\n\nYou can replace these sentinel values with `NaN` (Not a Number), which pandas can handle as missing data:\n\n```python\ndata.replace(-999, np.nan)\n```\n\nThis results in:\n\n```\n0    1.0\n1    NaN\n2    2.0\n3    NaN\n4  -1000.0\n5    3.0\ndtype: float64\n```\n\nThis example is taken from \"Python for Data Analysis: Data Wrangling with Pandas, NumPy, and IPython\" (Chapter 7: Data Cleaning and Preparation)."
+    },
+    {
+      "id": "F04",
+      "category": "factual",
+      "question": "According to the book, what NumPy function is used to create a pandas Series from a Python list?",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 121.44,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 1,
+      "keywords_total": 1,
+      "keyword_ratio": 1.0,
+      "citation_present": false,
+      "boundary_compliant": null,
+      "hallucinated": null,
+      "final_answer": "The function used to create a pandas Series from a Python list is not directly provided in the excerpt. However, it can be inferred that the `pandas.Series()` function is used for this purpose. Not found in the exact quote, but you can create a pandas Series from a Python list using `pandas.Series(your_list)`. For more detailed information, you may want to refer to the specific sections of your book or documentation."
+    },
+    {
+      "id": "F05",
+      "category": "factual",
+      "question": "What does the book say about reading CSV files with pandas?",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 133.86,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 2,
+      "keywords_total": 2,
+      "keyword_ratio": 1.0,
+      "citation_present": false,
+      "boundary_compliant": null,
+      "hallucinated": null,
+      "final_answer": "The book suggests using `pandas.read_csv` to read CSV files, and notes that due to messy real-world data, the function has many options. It's common to feel overwhelmed by the number of parameters, but the documentation provides examples to help. Here's a basic example:\n\n```python\nimport pandas as pd\ndf = pd.read_csv('examples/ex1.csv')\nprint(df)\n```\n\nThis will load the CSV file and display it as a DataFrame. You can also specify the delimiter if needed, like this:\n\n```python\ndf = pd.read_table('examples/ex1.csv', sep=',')\n```\n\nFor files without a header row, the function can still be used by specifying the appropriate parameters."
+    },
+    {
+      "id": "M01",
+      "category": "multi_chunk",
+      "question": "Explain the difference between dropna(), fillna(), and replace() according to the book. Cite the chapter for each.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 216.21,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 4,
+      "keywords_total": 4,
+      "keyword_ratio": 1.0,
+      "citation_present": false,
+      "boundary_compliant": null,
+      "hallucinated": null,
+      "final_answer": "The difference between `dropna()`, `fillna()`, and `replace()` in pandas is explained in the following chapters of \"Python for Data Analysis\":\n\n- **dropna()**: This function is used to remove missing values (NaNs) from a dataset. For example, `df.dropna()` removes any rows with at least one NaN value. Alternatively, `df.dropna(thresh=2)` can be used to remove rows with less than 2 non-NaN values. This is described in Chapter 7: Data Cleaning and Preparation.\n\n- **fillna()**: This function replaces missing values with specified values. For instance, `data.replace(-999, np.nan)` converts specific values (e.g., -999) to NaN, and `s.fillna(s.mean())` replaces NaN values with the mean of the series. This is detailed in Chapter 10: Data Aggregation and Group Operations.\n\n- **replace()**: This method is used to replace specific values within a dataset. It can be seen in the example where values `-999` are replaced with `NaN`. This is discussed in Chapter 7: Data Cleaning and Preparation.\n\nEach of these methods serves a different purpose in handling missing or sentinel values in data."
+    },
+    {
+      "id": "M02",
+      "category": "multi_chunk",
+      "question": "How does the book describe grouping data and applying aggregations? Mention specific functions.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 142.94,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 1,
+      "keywords_total": 2,
+      "keyword_ratio": 0.5,
+      "citation_present": false,
+      "boundary_compliant": null,
+      "hallucinated": null,
+      "final_answer": "The book mentions that in the context of data analysis with Pandas, grouping data and applying aggregations involves splitting data into groups based on one or more keys, applying a function to each group, and then combining the results. For instance, to compute means for just the `data2` column, you can use the syntax `df.groupby('key1')['data2']`, which is syntactic sugar for `df[['data2']].groupby(df['key1'])`. This is part of the split-apply-combine process described by Hadley Wickham."
+    },
+    {
+      "id": "M03",
+      "category": "multi_chunk",
+      "question": "What does the book cover about time series data? Mention at least two specific concepts.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 95.77,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 1,
+      "keywords_total": 1,
+      "keyword_ratio": 1.0,
+      "citation_present": false,
+      "boundary_compliant": null,
+      "hallucinated": null,
+      "final_answer": "The book covers two specific concepts related to time series data:\n\n1. Time series data is an important form of structured data in various fields such as finance, economics, and ecology. Data points in time series occur at regular intervals, like every 15 seconds or once per month. (Source: Python for Data Analysis)\n\n2. Time series can be irregular without a fixed time unit, and they can be marked using timestamps, fixed periods, or intervals. (Source: Python for Data Analysis)"
+    },
+    {
+      "id": "M04",
+      "category": "multi_chunk",
+      "question": "According to the book, how do you combine or merge DataFrames? Give one concrete example.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 139.79,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 3,
+      "keywords_total": 3,
+      "keyword_ratio": 1.0,
+      "citation_present": false,
+      "boundary_compliant": null,
+      "hallucinated": null,
+      "final_answer": "To combine or merge DataFrames, you can use the `pandas.merge` function, which is similar to database join operations. Here's an example:\n\n```python\ndf1 = pd.DataFrame({'key': ['b', 'b', 'a', 'c', 'a', 'a', 'b'],\n                    'data1': range(7)})\ndf2 = pd.DataFrame({'key': ['a', 'b', 'd'],\n                    'data2': range(3)})\n\nresult = pd.merge(df1, df2, on='key')\n```\n\nThis example merges `df1` and `df2` on the 'key' column, creating a new DataFrame that includes matching keys from both DataFrames."
+    },
+    {
+      "id": "M05",
+      "category": "multi_chunk",
+      "question": "What are the main plotting tools the book discusses? Give at least three specific plotting functions.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 94.28,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 2,
+      "keywords_total": 2,
+      "keyword_ratio": 1.0,
+      "citation_present": false,
+      "boundary_compliant": null,
+      "hallucinated": null,
+      "final_answer": "The book discusses several plotting tools and functions, with a focus on `matplotlib`. Specifically, it mentions that `plot()` is a basic function that creates line plots. Other functions include `scatter()` for scatter plots and `bar()` for bar plots. These functions are part of the `matplotlib` library and are used for creating various types of visualizations in data analysis."
+    },
+    {
+      "id": "A01",
+      "category": "adversarial",
+      "question": "According to the book, does fillna() support machine-learning-based imputation? Cite the exact passage.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 141.06,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 3,
+      "keywords_total": 3,
+      "keyword_ratio": 1.0,
+      "citation_present": false,
+      "boundary_compliant": true,
+      "hallucinated": false,
+      "final_answer": "The book \"Python for Data Analysis: Data Wrangling with Pandas, NumPy, and IPython\" does not mention fillna() supporting machine-learning-based imputation. The provided excerpts discuss filling missing values with constants, group-specific values, or using methods like forward filling (`method='ffill'`), but do not include any reference to machine learning techniques. Here is a relevant excerpt:\n\n```\nIn [33]: df.fillna(0)\nOut[33]\n```\n\nThis example fills missing values with a constant (0), but does not use machine learning for imputation."
+    },
+    {
+      "id": "A02",
+      "category": "adversarial",
+      "question": "Does the book recommend using PyTorch for data manipulation? Quote the exact recommendation.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 72.36,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 0,
+      "keywords_total": 0,
+      "keyword_ratio": null,
+      "citation_present": false,
+      "boundary_compliant": true,
+      "hallucinated": false,
+      "final_answer": "Not found in the book/docs. The provided excerpts do not contain a recommendation specifically for using PyTorch for data manipulation."
+    },
+    {
+      "id": "A03",
+      "category": "adversarial",
+      "question": "According to the book, does replace() accept regular expressions? Cite the exact passage where regex is mentioned for replace().",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 85.92,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 0,
+      "keywords_total": 0,
+      "keyword_ratio": null,
+      "citation_present": false,
+      "boundary_compliant": true,
+      "hallucinated": false,
+      "final_answer": "Not found in the book/docs."
+    },
+    {
+      "id": "A04",
+      "category": "adversarial",
+      "question": "Does the book cover deep learning models like transformers for time series prediction? Cite the chapter.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 123.72,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 0,
+      "keywords_total": 0,
+      "keyword_ratio": null,
+      "citation_present": false,
+      "boundary_compliant": true,
+      "hallucinated": false,
+      "final_answer": "The book does not explicitly mention transformers for time series prediction. However, it covers deep learning models in the context of time series analysis, including autoregressive processes and state space models. These are discussed in Chapter 13, \"Introduction to Modeling Libraries in Python.\" The book mentions that you can fit models with an unknown number of lagged terms and provides examples of simulating and fitting time series data. \n\nFor more detailed information on transformers or other advanced deep learning models, you might want to consult other chapters or resources specifically focused on deep learning."
+    },
+    {
+      "id": "A05",
+      "category": "adversarial",
+      "question": "According to the book, does pandas have a built-in function to automatically detect and fix duplicate column names with fuzzy matching?",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 104.06,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 0,
+      "keywords_total": 0,
+      "keyword_ratio": null,
+      "citation_present": false,
+      "boundary_compliant": true,
+      "hallucinated": false,
+      "final_answer": "Not found in the book/docs. However, Pandas does not have a built-in function specifically for detecting and fixing duplicate column names with fuzzy matching. You would need to implement this functionality yourself or use external libraries for fuzzy matching."
+    },
+    {
+      "id": "B01",
+      "category": "boundary",
+      "question": "What does the book say about Rust's ownership model in data analysis? If it doesn't cover this, say 'Not found in the book'.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 78.28,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 0,
+      "keywords_total": 0,
+      "keyword_ratio": null,
+      "citation_present": false,
+      "boundary_compliant": true,
+      "hallucinated": false,
+      "final_answer": "Not found in the book."
+    },
+    {
+      "id": "B02",
+      "category": "boundary",
+      "question": "According to the book, what is the best GPU for training neural networks? If not covered, say 'Not found in the book'.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 92.65,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 0,
+      "keywords_total": 0,
+      "keyword_ratio": null,
+      "citation_present": false,
+      "boundary_compliant": true,
+      "hallucinated": false,
+      "final_answer": "Not found in the book."
+    },
+    {
+      "id": "B03",
+      "category": "boundary",
+      "question": "Does the book explain how to deploy a pandas pipeline to a Kubernetes cluster? If not, say 'Not found in the book'.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 75.08,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 0,
+      "keywords_total": 0,
+      "keyword_ratio": null,
+      "citation_present": false,
+      "boundary_compliant": true,
+      "hallucinated": false,
+      "final_answer": "Not found in the book."
+    },
+    {
+      "id": "B04",
+      "category": "boundary",
+      "question": "What does the book say about using JavaScript for data analysis? If not covered, say 'Not found in the book'.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 71.62,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 0,
+      "keywords_total": 0,
+      "keyword_ratio": null,
+      "citation_present": false,
+      "boundary_compliant": true,
+      "hallucinated": false,
+      "final_answer": "Not found in the book."
+    },
+    {
+      "id": "B05",
+      "category": "boundary",
+      "question": "According to the book, what is the recommended Docker image for pandas development? If not covered, say 'Not found in the book'.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 75.73,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 0,
+      "keywords_total": 0,
+      "keyword_ratio": null,
+      "citation_present": false,
+      "boundary_compliant": true,
+      "hallucinated": false,
+      "final_answer": "Not found in the book."
+    },
+    {
+      "id": "C01",
+      "category": "citation",
+      "question": "According to the book, what exactly does the dropna() example show? Quote the example code.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 192.34,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 1,
+      "keywords_total": 1,
+      "keyword_ratio": 1.0,
+      "citation_present": false,
+      "boundary_compliant": null,
+      "hallucinated": null,
+      "final_answer": "The `dropna()` example in the book shows how to remove rows or columns containing missing values in a DataFrame. Here is the example code:\n\n```python\nfrom pandas import Series, DataFrame\nimport numpy as np\n\n# Series example\ndata = Series([1, np.nan, 3.5, np.nan, 7])\nprint(data.dropna())  # Output: 0    1.0\n                     #        2    3.5\n                     #        4    7.0\n                     #        dtype: float64\n\n# DataFrame example\ndata = DataFrame([[1., 6.5, 3.], [1., np.nan, np.nan], [np.nan, np.nan, np.nan], [np.nan, 6.5, 3.]])\ncleaned = data.dropna()  # Drops rows with any NaN\nprint(cleaned)\n\n# Dropping rows with all NaNs\nprint(data.dropna(how='all'))\n```\n\nThis demonstrates filtering out missing data in both Series and DataFrame objects."
+    },
+    {
+      "id": "C02",
+      "category": "citation",
+      "question": "Give me an exact quote from the book about fillna() with the mean.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 196.08,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 2,
+      "keywords_total": 2,
+      "keyword_ratio": 1.0,
+      "citation_present": false,
+      "boundary_compliant": null,
+      "hallucinated": null,
+      "final_answer": "Here is an exact quote from the book about using `fillna` with the mean:\n\n\"In [44]: data = pd.Series([1., NA, 3.5, NA, 7])\nIn [44]: data.fillna(data.mean())\nOut[44]: \n0    1.000000\n1    3.833333\n2    3.500000\n3    3.833333\n4    7.000000\ndtype: float64\"\n\nThis example demonstrates how to use the `fillna` method with the mean value of a Series."
+    },
+    {
+      "id": "C03",
+      "category": "citation",
+      "question": "According to the book, what specific chapter covers time series? Give the chapter number and one example.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 164.74,
+      "failure": false,
+      "tools_used": [
+        "knowledge_search"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": true,
+      "keywords_found": 2,
+      "keywords_total": 2,
+      "keyword_ratio": 1.0,
+      "citation_present": false,
+      "boundary_compliant": null,
+      "hallucinated": null,
+      "final_answer": "The specific chapter that covers time series is Chapter 11. For example, the text mentions slicing with datetime objects: \"In [56]: ts[datetime(2011, 1, 7):]\\nOut[56]:\\n2011-01-07 -0.519439\\n2011-01-08 -0.555730\\n2011-01-10 1.965781\\n2011-01-12 1.393406\\ndtype: float64\". This demonstrates how time series data can be manipulated using datetime indexing. This excerpt is from \"Python for Data Analysis: Data Wrangling with Pandas, NumPy, and IPython\"."
+    },
+    {
+      "id": "X01",
+      "category": "cross_tool",
+      "question": "What is 12345 * 6789?",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 26.07,
+      "failure": false,
+      "tools_used": [
+        "calculator"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": null,
+      "keywords_found": 1,
+      "keywords_total": 1,
+      "keyword_ratio": 1.0,
+      "citation_present": false,
+      "boundary_compliant": null,
+      "hallucinated": null,
+      "final_answer": "The result of 12345 * 6789 is 83810205."
+    },
+    {
+      "id": "X02",
+      "category": "cross_tool",
+      "question": "Who was Ada Lovelace? Give a two-sentence summary.",
+      "status": "done",
+      "iterations": 2,
+      "latency_s": 46.48,
+      "failure": false,
+      "tools_used": [
+        "wikipedia"
+      ],
+      "tool_correct": true,
+      "retrieval_hit": null,
+      "keywords_found": 2,
+      "keywords_total": 2,
+      "keyword_ratio": 1.0,
+      "citation_present": false,
+      "boundary_compliant": null,
+      "hallucinated": null,
+      "final_answer": "Ada Lovelace was an English mathematician and writer who is known for her work on Charles Babbage's analytical engine, recognizing its potential beyond pure calculation. Often considered the first computer programmer, her insights laid foundational ideas for modern computing. [Wikipedia]"
+    }
+  ]
+}

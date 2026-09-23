@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AgentOS — Dashboard</title>
+<link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+  <div class="container">
+    <h1>Dashboard</h1>
+
+    <div class="grid">
+      <div class="stat"><div class="label">Conversations</div><div class="value" id="s-conv">—</div></div>
+      <div class="stat"><div class="label">Agent Runs</div><div class="value" id="s-runs">—</div></div>
+      <div class="stat"><div class="label">Tool Calls</div><div class="value" id="s-tools">—</div></div>
+      <div class="stat"><div class="label">Documents</div><div class="value" id="s-docs">—</div></div>
+      <div class="stat"><div class="label">Chunks</div><div class="value" id="s-chunks">—</div></div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0">Quick actions</h2>
+      <p class="muted" style="margin-bottom:1rem">Start a chat or upload documents to your knowledge base.</p>
+      <div style="display:flex;gap:0.5rem">
+        <a class="btn" href="/chat">Open Chat</a>
+        <a class="btn secondary" href="/documents">Manage Documents</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-top:0">Recent conversations</h2>
+      <div id="convs"><p class="muted">Loading…</p></div>
+    </div>
+  </div>
+
+<script src="/static/nav.js"></script>
+<script>
+async function loadStats() {
+  const s = await fetch('/api/stats').then(r => r.json());
+  document.getElementById('s-conv').textContent = s.conversations;
+  document.getElementById('s-runs').textContent = s.agent_runs;
+  document.getElementById('s-tools').textContent = s.tool_calls;
+  document.getElementById('s-docs').textContent = s.documents;
+  document.getElementById('s-chunks').textContent = s.chunks;
+}
+
+async function loadConvs() {
+  const list = await fetch('/api/conversations').then(r => r.json());
+  const el = document.getElementById('convs');
+  if (!list.length) {
+    el.innerHTML = '<p class="muted">No conversations yet.</p>';
+    return;
+  }
+  el.innerHTML = `
+    <table>
+      <thead><tr><th>ID</th><th>Title</th><th>Runs</th><th>Created</th></tr></thead>
+      <tbody>
+        ${list.slice(0, 10).map(c => `
+          <tr>
+            <td class="mono">#${c.id}</td>
+            <td>${c.title || 'Untitled'}</td>
+            <td>${c.run_count}</td>
+            <td class="muted small">${c.created_at ? c.created_at.slice(0, 19) : ''}</td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+loadStats();
+loadConvs();
+</script>
+</body>
+</html>

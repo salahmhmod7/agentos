@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AgentOS — Documents</title>
+<link rel="stylesheet" href="/static/style.css">
+<style>
+  .drop-zone {
+    border: 2px dashed var(--border);
+    border-radius: 8px;
+    padding: 2rem;
+    text-align: center;
+    color: var(--text-dim);
+    cursor: pointer;
+    transition: all 0.15s;
+    background: var(--bg);
+  }
+  .drop-zone:hover, .drop-zone.dragover {
+    border-color: var(--blue);
+    color: var(--text);
+    background: var(--bg-3);
+  }
+  .drop-zone input { display: none; }
+</style>
+</head>
+<body>
+  <div class="container">
+    <h1>Knowledge Base</h1>
+    <p class="muted" style="margin-bottom:1rem">
+      Upload PDF, TXT, or Markdown files. They'll be chunked, embedded, and indexed for the agent.
+    </p>
+
+    <div class="card">
+      <div class="drop-zone" id="drop">
+        <input type="file" id="file" accept=".pdf,.txt,.md">
+        <div style="font-size:2rem;margin-bottom:0.5rem">📄</div>
+        <div><strong>Click</strong> or drag a file here</div>
+        <div class="small muted" style="margin-top:0.4rem">Max 20 MB · PDF, TXT, MD</div>
+      </div>
+      <div id="upload-status" class="small" style="margin-top:0.75rem"></div>
+    </div>
+
+    <h2>Uploaded documents</h2>
+    <div id="list"><p class="muted">Loading…</p></div>
+  </div>
+
+<script src="/static/nav.js"></script>
+<script>
+const dropZone = document.getElementById('drop');
+const fileInput = document.getElementById('file');
+const statusEl = document.getElementById('upload-status');
+
+dropZone.addEventListener('click', () => fileInput.click());
+dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('dragover'); });
+dropZone.addEventListener('dragleave', () => dropZone.classList.remove('dragover'));
+dropZone.addEventListener('drop', e => {
+  e.preventDefault();
+  dropZone.classList.remove('dragover');
+  if (e.dataTransfer.files.length) upload(e.dataTransfer.files[0]);
+});
+fileInput.addEventListener('change', () => {
+  if (fileInput.files.length) upload(fileInput.files[0]);
+});
+
+async function upload(file) {
+  statusEl.innerHTML = `<span style="color:var(--yellow)">⏳ Uploading ${file.name}…</span>`;
+  const form = new FormData();
+  form.append('file', file);
+  try {
+    const res = await fetch('/api/documents', { method: 'POST', body: form });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.detail || 'Upload failed');
+    }
+    const data = await res.json();
+    statusEl.innerHTML = `<span style="color:var(--green)">✅ ${data.filename} · ${data.num_chunks} chunks ingested</span>`;
+    loadList();
+  } catch (e) {
+    statusEl.innerHTML = `<span style="color:var(--red)">❌ ${e.message}</span>`;
+  }
+  fileInput.value = '';
+}
+
+async function loadList() {
+  const list = await fetch('/api/documents').then(r => r.json());
+  const el = document.getElementById('list');
+  if (!list.length) {
+    el.innerHTML = '<p class="muted">No documents yet. Upload one above.</p>';
+    return;
+  }
+  el.innerHTML = `
+    <table>
+      <thead><tr><th>ID</th><th>Name</th><th>Pages</th><th>Chunks</th><th>Actions</th></tr></thead>
+      <tbody>
+        ${list.map(d => `
+          <tr>
+            <td class="mono">#${d.id}</td>
+            <td>${d.name}</td>
+            <td>${d.num_pages}</td>
+            <td>${d.num_chunks}</td>
+            <td>
+              <button class="btn secondary small" onclick="viewDoc(${d.id})">View</button>
+              <button class="btn danger small" onclick="delDoc(${d.id})">Delete</button>
+            </td>
+          </tr>
+        `).join('')}
+      </tbody>
+    </table>
+  `;
+}
+
+async function delDoc(id) {
+  if (!confirm(`Delete document #${id}?`)) return;
+  await fetch(`/api/documents/${id}`, { method: 'DELETE' });
+  loadList();
+}
+
+async function viewDoc(id) {
+  const doc = await fetch(`/api/documents/${id}`).then(r => r.json());
+  const chunks = doc.chunks.map(c => `
+    <div class="chunk">
+      <div class="head">
+        <span>chunk #${c.chunk_index}</span>
+        <span>${c.text.length} chars</span>
+      </div>
+      <div class="text">${escapeHtml(c.text)}</div>
+    </div>
+  `).join('');
+
+  const modal = document.createElement('div');
+  modal.style.cssText = `
+    position:fixed;inset:0;background:rgba(0,0,0,0.7);
+    display:flex;align-items:center;justify-content:center;
+    padding:2rem;z-index:1000;overflow-y:auto;
+  `;
+  modal.innerHTML = `
+    <div class="card" style="max-width:800px;width:100%;max-height:80vh;overflow-y:auto">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:1rem">
+        <h2 style="margin:0">${doc.name}</h2>
+        <button class="btn secondary" onclick="this.closest('div').parentElement.parentElement.remove()">Close</button>
+      </div>
+      <p class="muted small">${doc.num_chunks} chunks · ${doc.num_pages} pages</p>
+      ${chunks || '<p class="muted">No chunks.</p>'}
+    </div>
+  `;
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+}
+
+function escapeHtml(s) {
+  return s.replace(/[&<>"']/g, c => ({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[c]));
+}
+
+loadList();
+</script>
+</body>
+</html>

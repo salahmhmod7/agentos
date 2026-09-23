@@ -1,0 +1,103 @@
+# ==================================
+# Python
+# ==================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+dist/
+*.egg-info/
+.eggs/
+
+# ==================================
+# Virtual Environments
+# ==================================
+.venv/
+venv/
+env/
+ENV/
+
+# ==================================
+# Environment & Secrets — CRITICAL
+# ==================================
+.env
+.env.local
+.env.*.local
+*.key
+*.pem
+*api*key*
+*API*KEY*
+groc*
+*secret*
+
+# ==================================
+# Databases & SQLite artifacts
+# ==================================
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+*.sqlite3
+agentos.db*
+data/eval/*.db
+
+# ==================================
+# Generated content
+# ==================================
+data/reports/
+data/eval/latest_run.json
+data/eval/v1_baseline_*.json
+data/eval/v2_*.json
+data/sample_handbook.txt
+data/*.pdf
+data/*.docx
+data/*.epub
+
+# ==================================
+# Temp / dev files
+# ==================================
+check_env.py
+*.html
+!data/static/*.html
+بناء*
+*_files/
+
+# ==================================
+# LangGraph checkpoints
+# ==================================
+checkpoints/
+.langgraph/
+
+# ==================================
+# IDEs
+# ==================================
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# ==================================
+# OS
+# ==================================
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# ==================================
+# Logs & Coverage
+# ==================================
+*.log
+logs/
+.coverage
+htmlcov/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# ==================================
+# Notebooks
+# ==================================
+.ipynb_checkpoints/
